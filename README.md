@@ -1,8 +1,7 @@
-# LineStickers_toTelegram
-# 轉移你的Line貼圖至Telegram
-
-## DON'T UPLOAD COPYRIGHTED STICKERS TO TELEGRAM !!!
-## 警告 請勿上傳有版權的貼圖!!!
+### LineStickers_toTelegram
+### DON'T UPLOAD COPYRIGHTED STICKERS TO TELEGRAM !!!
+- 轉移你的Line貼圖至Telegram
+- 警告 請勿上傳有版權的貼圖!!!
 
 - move your stickers from line to telegram by a telegram robot.
 - just paste the sticker url on line shop, then it will generate a new stickerset
