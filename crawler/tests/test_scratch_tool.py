@@ -1,13 +1,13 @@
 """
 How to run pytest
 
-pipenv run pytest -s
+pipenv run python -m pytest -s
 """
 
 import pytest
 import validators
-import io
-from scratch_tool import LineSticker
+from crawler.scratch_tool import get_sticker_name_hash
+from crawler.line_crawler import LineCrawler
 
 
 line_shop_sticker_urls = [
@@ -20,17 +20,22 @@ line_shop_sticker_urls = [
 
 @pytest.mark.parametrize("url", line_shop_sticker_urls)
 def test_get_sticker_img_set(url):
-    sticker_urls = LineSticker.get_sticker_img_set(url)
+    sticker_urls = LineCrawler._get_sticker_img_set(url)
     for uri in sticker_urls:
         assert validators.url(uri)
 
 
 @pytest.mark.parametrize("url", line_shop_sticker_urls)
 def test_get_sticker_name(url):
-    name = LineSticker.get_sticker_name(url)
-    print(name)
+    name = str(LineCrawler.get_sticker_name(url))
+    assert type(name) is str
+    # then test_get_sticker_name_hash
+    hash = get_sticker_name_hash(name)
+    assert type(hash) is str
+    print(hash)
 
 
-def test_resize_func():
-    result = LineSticker().get_test_imgbytes()[0]
-    assert isinstance(result, io.BytesIO)
+@pytest.mark.parametrize("name", ["中文貼圖", "ENG貼圖", "#$%@貼圖"])
+def test_get_sticker_name_hash(name):
+    hash = get_sticker_name_hash(name)
+    assert type(hash) is str

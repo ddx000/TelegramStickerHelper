@@ -70,5 +70,5 @@ paste the url on chat windows and then you will get stickers
 **免責聲明**:
 1. 本程式碼僅供學術使用，您可以從其中學到python, async, web crawler
 2. Telegram使用規範中有提到，貼圖不能上傳有版權的東西，所以任意爬取Line貼圖是違法的，後果請自行負責
-3. scratch_tool.py中設計是可替換的，可以自行繼承LineSticker class 來複寫 get_parsed_urls函式，即可爬取無版權的圖片作為上傳使用
+3. scratch_tool.py中設計是可替換的，可以自行繼承LineSticker class 來複寫 sticker_img_set函式，即可爬取無版權的圖片作為上傳使用
 
