@@ -32,7 +32,6 @@ def test_get_sticker_name(url):
     # then test_get_sticker_name_hash
     hash = get_sticker_name_hash(name)
     assert type(hash) is str
-    print(hash)
 
 
 @pytest.mark.parametrize("name", ["中文貼圖", "ENG貼圖", "#$%@貼圖"])

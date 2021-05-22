@@ -1,8 +1,18 @@
 import json
+import logging as log
 
 from crawler.base_crawler import BaseCrawler
 from crawler.scratch_tool import get_soup_by_url
 
+log.basicConfig(
+    level=log.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    encoding='utf-8',
+    handlers=[
+        log.FileHandler("debug.log"),
+        log.StreamHandler()
+    ]
+)
 
 class LineCrawler(BaseCrawler):
     @staticmethod
@@ -22,7 +32,7 @@ class LineCrawler(BaseCrawler):
                             img_url = img_url[: -len(remove_string)]
                         sticker_img_set.add(img_url)
             except Exception as ex:
-                print(f"Exception happend in parsing image {ex}")
+                log.error(f"Exception happend in parsing image {ex}")
         return sticker_img_set
 
     @staticmethod
@@ -32,4 +42,5 @@ class LineCrawler(BaseCrawler):
         if p_tag and p_tag.contents:
             return str(p_tag.contents[0])
         else:
+            log.error(f"UnknownStickerName {p_tag}")
             return "UnknownStickerName"

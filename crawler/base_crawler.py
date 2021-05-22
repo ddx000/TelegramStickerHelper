@@ -1,7 +1,17 @@
 from crawler.scratch_tool import resize_img
 from io import BytesIO
 import requests
+import logging as log
 
+log.basicConfig(
+    level=log.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    encoding='utf-8',
+    handlers=[
+        log.FileHandler("debug.log"),
+        log.StreamHandler()
+    ]
+)
 
 class BaseCrawler:
     @classmethod
