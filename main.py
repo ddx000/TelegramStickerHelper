@@ -32,6 +32,8 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
     def __init__(self, *args, **kwargs):
         super(TelegramRobot, self).__init__(*args, **kwargs)
         self.stickeremoji = "😶"
+        self.upload_success = 0
+        self.upload_fail = 0
 
     async def open(self, initial_msg, seed):
         """Every msg from each users need a connection open, return True if session created"""
@@ -46,14 +48,24 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
         content_type, chat_type, chat_id, msg_date, msg_id = telepot.glance(
             msg, long=True
         )
+        try:
+            if content_type == "text" and "http" in msg["text"]:
+                url = re.findall(r"(https?://\S+)", msg["text"])[0]
+                img_bytes = LineCrawler.get_sticker_resized_bytes(url)
+                line_sticker_name = LineCrawler.get_sticker_name(url)
+                telegram_package_name = get_sticker_name_hash(line_sticker_name)
+                await self.uploader(img_bytes, telegram_package_name, line_sticker_name)
 
-        if content_type == "text" and "http" in msg["text"]:
-            url = re.findall(r"(https?://\S+)", msg["text"])[0]
-            self.packmade = False
-            img_bytes = LineCrawler.get_sticker_resized_bytes(url)
-            line_sticker_name = LineCrawler.get_sticker_name(url)
-            telegram_package_name = get_sticker_name_hash(line_sticker_name)
-            await self.uploader(img_bytes, telegram_package_name, line_sticker_name)
+            elif content_type == "text" and "debug" in msg["text"]:
+                await self.sender.sendMessage(f"Robot alive SUCCESS:{self.upload_success} FAIL: {self.upload_fail}")
+        except Exception as ex:
+            await self.sender.sendMessage("Something wrong...on_chat_message  " + str(ex))
+            log.exception(f"Something wrong on_chat_message -{ex}")
+            msg_text = msg["text"]
+            log.error(f"{content_type} -msg - {msg_text}")
+            log.info(f"{chat_type} {chat_id} {msg_date} {msg_id}")
+            self.upload_fail += 1
+
 
     async def uploader(self, imgbytelst, sticker_id, title):
         packname = sticker_id + "_by_" + ROBOTNAME
@@ -100,12 +112,19 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
                     )
                 else:
                     await self.sender.sendMessage("Something wrong... " + str(e))
-                    log.error(f"{title}-{packname} Something wrong -{e}")
+                    log.exception(f"{title}-{packname} Something wrong -{e}")
+                    self.upload_fail += 1
+                break
+            except Exception as e:
+                await self.sender.sendMessage("Something wrong... " + str(e))
+                log.exception(f"{title}-{packname} Something wrong -{e}")
+                self.upload_fail += 1
                 break
         else:
             await self.sender.sendMessage(
                 "Uploaded Finished https://t.me/addstickers/" + packname
             )
+            self.upload_success +=1
             log.info(f"{packname} - {title} Finish")
 
 
