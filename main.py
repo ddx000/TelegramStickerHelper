@@ -4,7 +4,9 @@ import re
 import telepot, telepot.aio
 from telepot.aio.loop import MessageLoop
 from telepot.aio.delegate import per_chat_id, create_open, pave_event_space
-from scratch_tool import LineSticker, get_sticker_name_hash
+
+from crawler.scratch_tool import get_sticker_name_hash
+from crawler.line_crawler import LineCrawler
 
 """
 pipenv run python ./TeleRobot.py
@@ -42,14 +44,14 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
         if content_type == 'text' and 'http' in msg['text']:
             url = re.findall(r'(https?://\S+)', msg['text'])[0]
             self.packmade = False
-            img_bytes = LineSticker.get_sticker_resized_bytes(url)
-            line_sticker_name = LineSticker.get_sticker_name(url)
+            img_bytes = LineCrawler.get_sticker_resized_bytes(url)
+            line_sticker_name = LineCrawler.get_sticker_name(url)
             telegram_package_name = get_sticker_name_hash(line_sticker_name)
             await self.uploader(img_bytes, telegram_package_name, line_sticker_name )
 
         if content_type == 'text' and 'dev_test' in msg['text']:
             self.packmade = False
-            await self.uploader(LineSticker().get_test_imgbytes(),'00001', 'title')
+            await self.uploader(LineCrawler().get_test_imgbytes(),'00001', 'title')
 
 
 
