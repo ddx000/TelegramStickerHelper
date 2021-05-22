@@ -1,5 +1,13 @@
 # Telegram Sticker Helper
 
+# change to pipenv
+
+pipenv install
+pipenv run python .\TeleRobot.py
+
+# how to run unittest
+
+
 **It is illegal to upload copyrighted stickers to telegram, please use at your own risk**
 
 Telegram Sticker Helper is an Sticker Bot for the Telegram Messenger.   
