@@ -4,21 +4,27 @@ import requests
 import re
 from io import BytesIO
 import json
+import base64
 
 
-def get_valid_sticker_name(url):
+def get_sticker_name_hash(name):
+    name_b = name.encode("UTF-8")
+    name_hash_b = base64.b64encode(name_b)
+    name_hash = name_hash_b.decode("UTF-8")
+    name_hash_filtered = filter_hash_name(name_hash)
+    return name_hash_filtered
+
+def filter_hash_name(name_hash):
     """
     Valid_sticker_name must be only english alphabets
-    The logic here is we convert sid (showed on urls - 5 digits)
-    to alphabets (1->a 2->b )...and so on
     """
-    sid = re.findall("/\d{5}/", url)[0][1:-1]
-    ans = []
-    for i in sid:
-        ans.append(chr(int(i) + 97))
-
-    return "".join(ans)
-
+    filter_name = ""
+    for char in name_hash:
+        if char.isalpha():
+            filter_name += char
+        elif char.isdigit():
+            filter_name += chr(int(char) + 97)
+    return filter_name
 
 def get_soup_by_url(url):
     try:
@@ -32,20 +38,15 @@ def get_soup_by_url(url):
 
 class LineSticker:
     # TODO have a base class
-    def get_imgbytes(self, url):
-        """Main Driver Functions -->  get_parsed_urls --> requests --> resize_img
-        url: string(http_url)
-        @return
-        sticker_bytes_lst: lst of bytes
-        """
+    @classmethod
+    def get_sticker_resized_bytes(cls, url):
         sticker_bytes_lst = []
-        sticker_url_lst = self.get_parsed_urls(url)
-        title = self.get_sticker_name(url)
-        for one_url in sticker_url_lst:
+        sticker_url_set = cls.get_sticker_img_set(url)
+        for sticker_url in sticker_url_set:
             # TODO change to await request
-            response = requests.get(one_url)
-            sticker_bytes_lst.append(self.resize_img(BytesIO(response.content)))
-        return sticker_bytes_lst, title
+            response = requests.get(sticker_url)
+            sticker_bytes_lst.append(cls.resize_img(BytesIO(response.content)))
+        return sticker_bytes_lst
 
     def get_test_imgbytes(self):
         """for developer test on Telegram UI, input dev_test, return single resized google logo"""
@@ -78,13 +79,12 @@ class LineSticker:
         soup = get_soup_by_url(url)
         p_tag = soup.find("p", {"data-test": "sticker-name-title"})
         if p_tag and p_tag.contents:
-            return p_tag.contents[0]
+            return str(p_tag.contents[0])
         else:
             return "UnknownStickerName"
 
     @staticmethod
     def resize_img(byteIO):
-        # CPU-Bound Functions
         # Stickers telegram required must be 512*n or m*512
         img = Image.open(byteIO)
         width, height = img.size[0], img.size[1]
@@ -97,5 +97,6 @@ class LineSticker:
             img2 = img.resize((int(width * resize_ratio), 512), Image.BICUBIC)
         byte_io = BytesIO()
         img2.save(byte_io, "PNG")
+        print(img2.size)
         byte_io.seek(0)
         return byte_io

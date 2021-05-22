@@ -4,7 +4,12 @@ import re
 import telepot, telepot.aio
 from telepot.aio.loop import MessageLoop
 from telepot.aio.delegate import per_chat_id, create_open, pave_event_space
-from scratch_tool import LineSticker, get_valid_sticker_name
+from scratch_tool import LineSticker, get_sticker_name_hash
+
+"""
+pipenv run python ./TeleRobot.py
+"""
+
 
 """
 Please apply for telegram-robot by yourself and get the key
@@ -37,24 +42,22 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
         if content_type == 'text' and 'http' in msg['text']:
             url = re.findall(r'(https?://\S+)', msg['text'])[0]
             self.packmade = False
-            self.img_bytes, self.title = None, None
-            packname = get_valid_sticker_name(url)
-            await self.get_stickers(url)
-            await self.uploader(self.img_bytes, packname, self.title )
+            img_bytes = LineSticker.get_sticker_resized_bytes(url)
+            line_sticker_name = LineSticker.get_sticker_name(url)
+            telegram_package_name = get_sticker_name_hash(line_sticker_name)
+            await self.uploader(img_bytes, telegram_package_name, line_sticker_name )
 
         if content_type == 'text' and 'dev_test' in msg['text']:
             self.packmade = False
             await self.uploader(LineSticker().get_test_imgbytes(),'00001', 'title')
 
 
-    async def get_stickers(self, url):
-        """This is blocking-function now"""
-        self.img_bytes, self.title = LineSticker().get_imgbytes(url)
 
     async def uploader(self, imgbytelst, sticker_id, title):
         packname = sticker_id +'_by_' + ROBOTNAME
         print('Uploader running: ', packname)
         for cnt, one_sticker in enumerate(imgbytelst):
+            print(cnt, one_sticker)
             try:
                 if self.packmade:
                     if cnt % 8 == 0: # output progress bar for users
