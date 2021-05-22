@@ -23,6 +23,9 @@ def filter_hash_name(name_hash):
             filter_name += char
         elif char.isdigit():
             filter_name += chr(int(char) + 97)
+
+    if len(filter_name)>15:
+        filter_name = filter_name[:15]
     return filter_name
 
 

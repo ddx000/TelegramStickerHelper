@@ -54,25 +54,36 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
     async def uploader(self, imgbytelst, sticker_id, title):
         packname = sticker_id + "_by_" + ROBOTNAME
         print("Uploader running: ", packname)
+        # DON'T USE asyncio.wait(tasks) here, will cause send a lot of requests in a shorttime
+        # and get 429 Requests too many here
+        # so here we still just use sync for loop
+
         for cnt, one_sticker in enumerate(imgbytelst):
             try:
-                if self.packmade:
+                if cnt == 0:
+                    # Create new stickerset
+                    create_success = await bot.createNewStickerSet(
+                        self.from_id, packname, title, one_sticker, self.stickeremoji
+                    )
+                    if create_success:
+                        await self.sender.sendMessage("Created New StickerSet: " + packname)
+                    else:
+                        await self.sender.sendMessage("Created New StickerSet Failed")
+                elif cnt > 0:
                     if cnt % 8 == 0:  # output progress bar for users
                         progressbar = str((round(cnt / len(imgbytelst), 2) * 100)) + "%"
-                        await self.sender.sendMessage("working: " + progressbar)
+                        await self.sender.sendMessage("Working: " + progressbar)
                     await bot.addStickerToSet(
                         self.from_id, packname, one_sticker, self.stickeremoji
                     )
-                else:  # Create new stickerset, then self.packmade is set to True
-                    self.packmade = await bot.createNewStickerSet(
-                        self.from_id, packname, title, one_sticker, self.stickeremoji
-                    )
-                    await self.sender.sendMessage("Created New StickerSet: " + packname)
             except telepot.exception.TelegramError as e:
                 if "sticker set name is already occupied" in str(e):
                     await self.sender.sendMessage("Already Uploaded")
+                    await self.sender.sendMessage(
+                    "Try to find it here https://t.me/addstickers/" + packname
+                    )
                 else:
-                    await self.sender.sendMessage("something wrong... " + str(e))
+                    await self.sender.sendMessage("Something wrong... " + str(e))
                 break
         else:
             await self.sender.sendMessage(
