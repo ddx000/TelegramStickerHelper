@@ -17,11 +17,8 @@ pipenv run python ./main.py
 log.basicConfig(
     level=log.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    encoding='utf-8',
-    handlers=[
-        log.FileHandler("debug.log"),
-        log.StreamHandler()
-    ]
+    encoding="utf-8",
+    handlers=[log.FileHandler("debug.log"), log.StreamHandler()],
 )
 
 # Please apply for telegram-robot by yourself and get the key
@@ -75,8 +72,12 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
                         self.from_id, packname, title, one_sticker, self.stickeremoji
                     )
                     if create_success:
-                        log.info(f"Create New Sticker Set {packname} - {title}  success")
-                        await self.sender.sendMessage("Created New StickerSet: " + packname)
+                        log.info(
+                            f"Create New Sticker Set {packname} - {title}  success"
+                        )
+                        await self.sender.sendMessage(
+                            "Created New StickerSet: " + packname
+                        )
                     else:
                         log.error(f"Created New StickerSet {packname} - {title} Failed")
                         await self.sender.sendMessage("Created New StickerSet Failed")
@@ -92,9 +93,11 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
                 if "sticker set name is already occupied" in str(e):
                     await self.sender.sendMessage("Already Uploaded")
                     await self.sender.sendMessage(
-                    "Try to find it here https://t.me/addstickers/" + packname
+                        "Try to find it here https://t.me/addstickers/" + packname
                     )
-                    log.warning(f"{title} Already Uploaded -https://t.me/addstickers/{packname}")
+                    log.warning(
+                        f"{title} Already Uploaded -https://t.me/addstickers/{packname}"
+                    )
                 else:
                     await self.sender.sendMessage("Something wrong... " + str(e))
                     log.error(f"{title}-{packname} Something wrong -{e}")
