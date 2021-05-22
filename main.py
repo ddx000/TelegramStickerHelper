@@ -1,6 +1,8 @@
 import asyncio
 import json
 import re
+import logging as log
+
 import telepot, telepot.aio
 from telepot.aio.loop import MessageLoop
 from telepot.aio.delegate import per_chat_id, create_open, pave_event_space
@@ -12,12 +14,17 @@ from crawler.line_crawler import LineCrawler
 pipenv run python ./main.py
 """
 
+log.basicConfig(
+    level=log.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    encoding='utf-8',
+    handlers=[
+        log.FileHandler("debug.log"),
+        log.StreamHandler()
+    ]
+)
 
-"""
-Please apply for telegram-robot by yourself and get the key
-By using telegram api, uploader must add your robot's name after self.packname
-So change it by yourself
-"""
+# Please apply for telegram-robot by yourself and get the key
 with open("key.json", "r") as f:
     key = json.load(f)
     TOKEN = key["RobotToken"]
@@ -53,7 +60,8 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
 
     async def uploader(self, imgbytelst, sticker_id, title):
         packname = sticker_id + "_by_" + ROBOTNAME
-        print("Uploader running: ", packname)
+        log.info(f"Uploader running:{packname} - {title}")
+        await self.sender.sendMessage(f"Uploader running:{title}")
         # DON'T USE asyncio.wait(tasks) here, will cause send a lot of requests in a shorttime
         # and get 429 Requests too many here
         # so here we still just use sync for loop
@@ -62,16 +70,20 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
             try:
                 if cnt == 0:
                     # Create new stickerset
+                    log.info(f"Create New Sticker Set")
                     create_success = await bot.createNewStickerSet(
                         self.from_id, packname, title, one_sticker, self.stickeremoji
                     )
                     if create_success:
+                        log.info(f"Create New Sticker Set {packname} - {title}  success")
                         await self.sender.sendMessage("Created New StickerSet: " + packname)
                     else:
+                        log.error(f"Created New StickerSet {packname} - {title} Failed")
                         await self.sender.sendMessage("Created New StickerSet Failed")
                 elif cnt > 0:
                     if cnt % 8 == 0:  # output progress bar for users
                         progressbar = str((round(cnt / len(imgbytelst), 2) * 100)) + "%"
+                        log.info(f"{packname} - {title} In progess - {progressbar}")
                         await self.sender.sendMessage("Working: " + progressbar)
                     await bot.addStickerToSet(
                         self.from_id, packname, one_sticker, self.stickeremoji
@@ -82,13 +94,16 @@ class TelegramRobot(telepot.aio.helper.ChatHandler):
                     await self.sender.sendMessage(
                     "Try to find it here https://t.me/addstickers/" + packname
                     )
+                    log.warning(f"{title} Already Uploaded -https://t.me/addstickers/{packname}")
                 else:
                     await self.sender.sendMessage("Something wrong... " + str(e))
+                    log.error(f"{title}-{packname} Something wrong -{e}")
                 break
         else:
             await self.sender.sendMessage(
                 "Uploaded Finished https://t.me/addstickers/" + packname
             )
+            log.info(f"{packname} - {title} Finish")
 
 
 bot = telepot.aio.DelegatorBot(
@@ -101,5 +116,5 @@ bot = telepot.aio.DelegatorBot(
 )
 loop = asyncio.get_event_loop()
 loop.create_task(MessageLoop(bot).run_forever())
-print("Start Telegram Bot")
+log.info("Starting")
 loop.run_forever()
