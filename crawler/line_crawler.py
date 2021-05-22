@@ -3,6 +3,7 @@ import json
 from crawler.base_crawler import BaseCrawler
 from crawler.scratch_tool import get_soup_by_url
 
+
 class LineCrawler(BaseCrawler):
     @staticmethod
     def _get_sticker_img_set(url):

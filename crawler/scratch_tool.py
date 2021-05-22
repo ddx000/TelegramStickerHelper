@@ -1,4 +1,3 @@
-
 from PIL import Image
 from bs4 import BeautifulSoup
 import requests
@@ -13,6 +12,7 @@ def get_sticker_name_hash(name):
     name_hash_filtered = filter_hash_name(name_hash)
     return name_hash_filtered
 
+
 def filter_hash_name(name_hash):
     """
     Valid_sticker_name must be only english alphabets
@@ -25,6 +25,7 @@ def filter_hash_name(name_hash):
             filter_name += chr(int(char) + 97)
     return filter_name
 
+
 def get_soup_by_url(url):
     try:
         print("parsing_html", url)
@@ -33,6 +34,7 @@ def get_soup_by_url(url):
     except Exception as e:
         print("error on handling url", e)
     return soup
+
 
 def resize_img(byteIO):
     # Stickers telegram required must be 512*n or m*512
@@ -49,9 +51,3 @@ def resize_img(byteIO):
     img2.save(byte_io, "PNG")
     byte_io.seek(0)
     return byte_io
-
-
-
-
-
-

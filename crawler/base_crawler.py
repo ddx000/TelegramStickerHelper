@@ -2,8 +2,8 @@ from crawler.scratch_tool import resize_img
 from io import BytesIO
 import requests
 
-class BaseCrawler:
 
+class BaseCrawler:
     @classmethod
     def get_sticker_resized_bytes(cls, url):
         sticker_bytes_lst = []
