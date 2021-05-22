@@ -4,46 +4,33 @@ How to run pytest
 pipenv run pytest -s
 """
 
-from re import U
 import pytest
 import validators
-from bs4 import BeautifulSoup
-import requests
-import re
-import json 
-
-from scratch_tool import LineSticker 
+import io
+from scratch_tool import LineSticker
 
 
-@pytest.mark.parametrize("sticker_url",['https://store.line.me/stickershop/product/10306/zh-Hant'])
-def test_get_parsed_urls(sticker_url):
-    sticker_urls, name = LineSticker.get_parsed_urls(sticker_url)
+line_shop_sticker_urls = [
+    "https://store.line.me/stickershop/product/10306/zh-Hant",
+    "https://store.line.me/stickershop/product/14940212/zh-Hant",
+    "https://store.line.me/stickershop/product/23558/zh-Hant",
+    "https://store.line.me/stickershop/product/14801072/zh-Hant",
+]
+
+
+@pytest.mark.parametrize("url", line_shop_sticker_urls)
+def test_get_sticker_img_set(url):
+    sticker_urls = LineSticker.get_sticker_img_set(url)
     for uri in sticker_urls:
-        if not validators.url(uri):
-            print("####")
-            print(type(uri))
-            print(uri)
-        else:
-            print("pass")
-        
+        assert validators.url(uri)
 
 
-def test_crawler():
-    url = 'https://store.line.me/stickershop/product/14940212/zh-Hant'
-    try:
-        print('parsing_html', url)
-        req = requests.get(url)
-        soup = BeautifulSoup(req.text, 'lxml')
-    except Exception as e:
-        print('error on handling url', e)
-    # sticker_url_lst = []
-    results = soup.find_all("li")
-    for res in results:
-        image_url = res.attrs.get('data-preview',{})
-        if image_url:
-            dict = json.loads(image_url)
-            print(dict.get("staticUrl"))
+@pytest.mark.parametrize("url", line_shop_sticker_urls)
+def test_get_sticker_name(url):
+    name = LineSticker.get_sticker_name(url)
+    print(name)
 
-    # for tag in soup.select('li'):
-    #     print("----------")
-    #     print(tag)
+
+def test_resize_func():
+    result = LineSticker().get_test_imgbytes()[0]
+    assert isinstance(result, io.BytesIO)
