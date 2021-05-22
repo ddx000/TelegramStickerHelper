@@ -10,6 +10,7 @@ pillow = "*"
 bs4 = "*"
 requests = "*"
 lxml = "*"
+validators = "*"
 
 [dev-packages]
 

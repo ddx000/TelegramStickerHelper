@@ -38,7 +38,10 @@ class LineSticker:
         response = requests.get(testurl)
         return [self.resize_img(BytesIO(response.content))]
 
-    def get_parsed_urls(self, url):
+
+    @staticmethod
+    def get_parsed_urls(url):
+        print("###callled")
         try:
             print('parsing_html', url)
             req = requests.get(url)
@@ -47,14 +50,15 @@ class LineSticker:
             print('error on handling url', e)
         sticker_url_lst = []
         for tag in soup.select('li'):
-            lst = re.split(';|"', str(tag))
+            lst = re.split(';|"(', str(tag))
             for line in lst:
                 if 'iPhone/sticker@2x.png' in line:
                     sticker_url_lst.append(line)
         title = soup.select('h3')[0].text
         return sticker_url_lst , title
 
-    def resize_img(self, byteIO):
+    @staticmethod
+    def resize_img(byteIO):
         # CPU-Bound Functions
         # Stickers telegram required must be 512*n or m*512
         img = Image.open(byteIO)
