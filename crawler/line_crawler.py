@@ -7,7 +7,6 @@ from crawler.scratch_tool import get_soup_by_url
 log.basicConfig(
     level=log.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    encoding='utf-8',
     handlers=[
         log.FileHandler("debug.log"),
         log.StreamHandler()
